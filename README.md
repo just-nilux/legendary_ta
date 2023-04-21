@@ -5,15 +5,14 @@
     |___|  /__|____/____//__/\_ \
          \/                    \/
 
-### Legendary_TA
+## legendary_ta
 
-Popular indicators ported from MT4 and Pinescript to Python
+Popular MT4 & Pinescript indicators ported to Python
 
-✓ No lookahead or rewriting of candles
-✓ Tested with Freqtrade and FreqAI
-✓ Original indicator logic and calculations preserved
+- [x] Build for and tested with Freqtrade and FreqAI
+- [x] No lookahead bias observed
+- [x] Original indicator logic preserved
 
-t.me | @nlxtrading
 
 
 ### Use
@@ -22,7 +21,7 @@ t.me | @nlxtrading
   import legendary_ta as lta
   ```
   
-### Credits / References
+### Credits
 
 * [Fisher Stochastic Center of Gravity](https://tradingview.com/script/5BT3a9mJ-Fisher-Stochastic-Center-of-Gravity/)
 * [Leledc Exhaustion Bars](https://tradingview.com/script/jB2a9GAV-Leledc-levels-IS/)
@@ -30,3 +29,6 @@ t.me | @nlxtrading
 * [S/R Breakouts and Retests](#)
 * [SMI - Stochastic Momentum Index](https://de.tradingview.com/script/NULg8CIG-Stochastic-Momentum-Index/)
 
+### Requests
+
+:envelope: Telegram @nlxtrading
