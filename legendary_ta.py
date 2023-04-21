@@ -18,8 +18,6 @@ from pandas import DataFrame, Series
      ✓ Tested with Freqtrade and FreqAI
      ✓ More to come!
     
-    Telegram >>> @nlxtrading
-    
     
     Usage:
     
@@ -32,7 +30,8 @@ from pandas import DataFrame, Series
             
             # Leledc Exhaustion Bars
             dataframe = lta.exhaustion_bars(dataframe)
-            # dataframe["lelec"]                        1 (Up) / 0 (Neutral) / -1 (Down)
+            # dataframe["lelec_major"]                  = 1 (Up) / -1 (Down) Direction
+            # dataframe["lelec_minor"]                  = 1 Sellers exhausted / 0 Hold / -1 Buyers exhausted 
             
             # Pinbar Reversals
             dataframe = lta.pinbar(dataframe, smi)
@@ -98,59 +97,64 @@ def fisher_cg(df: DataFrame, length=20, min_period=10):
     return df
 
 
-def exhaustion_bars(df: DataFrame, lookback=6, length=30) -> DataFrame:
-    """ 
-    NLX Leledc Exhaustion Bars
-    Infamous S/R Reversal Indicator for Scalping
+def exhaustion_bars(dataframe, maj_qual=6, maj_len=12, min_qual=6, min_len=12, core_length=4):
+    """
+    Leledc Exhaustion Bars - Extended
+    Infamous S/R Reversal Indicator
+
+    leledc_major: 
+    1 Up / -1 Down Trend
     
-    Inpired by glaz https://www.tradingview.com/script/2rZDPyaC-Leledc-Exhaustion-Bar/ 
+    leledc_minor: 
+    1 Sellers exhausted
+    0 Neutral / Hold
+    -1 Buyers exhausted 
+
+    Inpired by glaz https://www.tradingview.com/script/2rZDPyaC-Leledc-Exhaustion-Bar/
     Original (MT4) https://www.abundancetradinggroup.com/leledc-exhaustion-bar-mt4-indicator/
 
     :return: DataFrame with columns populated
     """
-    
-    df['resistance'] = np.nan
-    df['support'] = np.nan
-    df['lelec'] = 0
 
-    bindex = np.zeros(len(df))
-    sindex = np.zeros(len(df))
+    bindex_maj, sindex_maj, trend_maj = 0, 0, 0
+    bindex_min, sindex_min = 0, 0
 
-    for i in range(4, len(df)):
-        bindex[i] = bindex[i - 1] + 1 if df.loc[i, 'close'] > df.loc[i - 4, 'close'] else bindex[i - 1]
-        sindex[i] = sindex[i - 1] + 1 if df.loc[i, 'close'] < df.loc[i - 4, 'close'] else sindex[i - 1]
+    for i in range(len(dataframe)):
+        close = dataframe['close'][i]
 
-        is_bearish_engulfing = (
-            bindex[i] > lookback and
-            df.loc[i, 'close'] < df.loc[i, 'open'] and
-            df.loc[i, 'high'] >= df.loc[i - length:i, 'high'].max()
-        )
-        is_bullish_engulfing = (
-            sindex[i] > lookback and
-            df.loc[i, 'close'] > df.loc[i, 'open'] and
-            df.loc[i, 'low'] <= df.loc[i - length:i, 'low'].min()
-        )
+        if i < 1 or i - core_length < 0:
+            dataframe.loc[i, 'leledc_major'] = np.nan
+            dataframe.loc[i, 'leledc_minor'] = 0
+            continue
 
-        if is_bearish_engulfing:
-            bindex[i] = 0
-            df.loc[i, 'lelec'] = -1
-            df.loc[i, 'resistance'] = df.loc[i, 'high']
-        elif is_bullish_engulfing:
-            sindex[i] = 0
-            df.loc[i, 'lelec'] = 1
-            df.loc[i, 'support'] = df.loc[i, 'low']
+        bindex_maj, sindex_maj = np.nan_to_num(bindex_maj), np.nan_to_num(sindex_maj)
+        bindex_min, sindex_min = np.nan_to_num(bindex_min), np.nan_to_num(sindex_min)
+
+        if close > dataframe['close'][i - core_length]:
+            bindex_maj += 1
+            bindex_min += 1
+        elif close < dataframe['close'][i - core_length]:
+            sindex_maj += 1
+            sindex_min += 1
+
+        update_major = False
+        if bindex_maj > maj_qual and close < dataframe['open'][i] and dataframe['high'][i] >= dataframe['high'][i - maj_len:i].max():
+            bindex_maj, trend_maj, update_major = 0, 1, True
+        elif sindex_maj > maj_qual and close > dataframe['open'][i] and dataframe['low'][i] <= dataframe['low'][i - maj_len:i].min():
+            sindex_maj, trend_maj, update_major = 0, -1, True
+
+        dataframe.loc[i, 'leledc_major'] = trend_maj if update_major else np.nan if trend_maj == 0 else trend_maj
+
+        if bindex_min > min_qual and close < dataframe['open'][i] and dataframe['high'][i] >= dataframe['high'][i - min_len:i].max():
+            bindex_min = 0
+            dataframe.loc[i, 'leledc_minor'] = -1
+        elif sindex_min > min_qual and close > dataframe['open'][i] and dataframe['low'][i] <= dataframe['low'][i - min_len:i].min():
+            sindex_min = 0
+            dataframe.loc[i, 'leledc_minor'] = 1
         else:
-            if df.loc[i - 1, 'lelec'] == -1 and df.loc[i, 'close'] > df.loc[i - 1, 'resistance']:
-                df.loc[i, 'lelec'] = 0
-            elif df.loc[i - 1, 'lelec'] == 1 and df.loc[i, 'close'] < df.loc[i - 1, 'support']:
-                df.loc[i, 'lelec'] = 0
-            else:
-                df.loc[i, 'lelec'] = df.loc[i - 1, 'lelec']
+            dataframe.loc[i, 'leledc_minor'] = 0
 
-            df.loc[i, 'resistance'] = df.loc[i - 1, 'resistance']
-            df.loc[i, 'support'] = df.loc[i - 1, 'support']
-
-    return df
+    return dataframe
 
 
 def breakouts(df: DataFrame, length=20):
