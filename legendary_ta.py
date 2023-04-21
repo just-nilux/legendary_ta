@@ -276,7 +276,7 @@ def exhaustion_bars(dataframe, maj_qual=6, maj_len=12, min_qual=6, min_len=12, c
 Dynamic Leledc Exhaustion Bars
 """
 
-def dynamic_exhaustion_bars(dataframe, window=100):
+def dynamic_exhaustion_bars(dataframe, window=500):
     """
     Dynamic Leledc Exhaustion Bars -  By nilux
     The lookback length and exhaustion bars adjust dynamically to the market.
@@ -294,14 +294,14 @@ def dynamic_exhaustion_bars(dataframe, window=100):
     """
     
     dataframe['close_pct_change'] = dataframe['close'].pct_change()
-    dataframe['pct_change_zscore'] = qtpylib.zscore(dataframe, window=window, col='close_pct_change')
-    dataframe['pct_change_zscore_smoothed'] = dataframe['pct_change_zscore'].rolling(window=5).mean()
+    dataframe['pct_change_zscore'] = qtpylib.zscore(dataframe, col='close_pct_change')
+    dataframe['pct_change_zscore_smoothed'] = dataframe['pct_change_zscore'].rolling(window=3).mean()
     dataframe['pct_change_zscore_smoothed'].fillna(1.0, inplace=True)
 
     # To Do: Improve outlier detection
     
-    zscore = dataframe['pct_change_zscore_smoothed'].values
-    zscore_multi = np.maximum(np.minimum(5.0 - zscore*2, 5.0), 1.5)
+    zscore = dataframe['pct_change_zscore_smoothed'].to_numpy()
+    zscore_multi = np.maximum(np.minimum(5.0 - zscore * 2, 5.0), 1.5)
 
     maj_qual, min_qual = calculate_exhaustion_candles(dataframe, window, zscore_multi)
     
@@ -367,8 +367,8 @@ def calculate_exhaustion_candles(dataframe, window, multiplier):
         avg_consecutive = consecutive_count(idx_range)
         if isinstance(avg_consecutive, np.ndarray):
             avg_consecutive = avg_consecutive.item()
-        maj_qual[i] = int(avg_consecutive * multiplier[i]) if not np.isnan(avg_consecutive) else 0
-        min_qual[i] = int(avg_consecutive * multiplier[i]) if not np.isnan(avg_consecutive) else 0
+        maj_qual[i] = int(avg_consecutive * ( 3 * multiplier[i])) if not np.isnan(avg_consecutive) else 0
+        min_qual[i] = int(avg_consecutive * ( 3 * multiplier[i])) if not np.isnan(avg_consecutive) else 0
 
     return maj_qual, min_qual
 
@@ -377,14 +377,16 @@ def calculate_exhaustion_lengths(dataframe):
     Calculate the average length of peaks and valleys to adjust the exhaustion bands dynamically
     To Do: Apply ML (FreqAI) to make prediction
     """
-    high_indices = argrelextrema(dataframe['high'].values, compare)
-    low_indices = argrelextrema(dataframe['low'].values, compare_less)
+    high_indices = argrelextrema(dataframe['high'].to_numpy(), np.greater)
+    low_indices = argrelextrema(dataframe['low'].to_numpy(), np.less)
 
     avg_peak_distance = np.mean(np.diff(high_indices))
+    std_peak_distance = np.std(np.diff(high_indices))
     avg_valley_distance = np.mean(np.diff(low_indices))
+    std_valley_distance = np.std(np.diff(low_indices))
 
-    maj_len = int(avg_peak_distance)
-    min_len = int(avg_valley_distance)
+    maj_len = int(avg_peak_distance + std_peak_distance)
+    min_len = int(avg_valley_distance + std_valley_distance)
 
     return maj_len, min_len
 
