@@ -30,12 +30,12 @@ from technical import qtpylib
             # Fisher Stochastic Center of Gravity
             dataframe = lta.fisher_cg(dataframe)
             # dataframe["fisher_cg"]                    Float (Center Line)
-            # dataframe["fisher_trigger"]               Float (Trigger Line)
+            # dataframe["fisher_sig"]               Float (Trigger Line)
             
             # Leledc Exhaustion Bars
             dataframe = lta.exhaustion_bars(dataframe)
-            # dataframe["lelec_major"]                  = 1 (Up) / -1 (Down) Direction
-            # dataframe["lelec_minor"]                  = 1 Sellers exhausted / 0 Hold / -1 Buyers exhausted 
+            # dataframe["leledc_major"]                  = 1 (Up) / -1 (Down) Direction
+            # dataframe["leledc_minor"]                  = 1 Sellers exhausted / 0 Hold / -1 Buyers exhausted 
             
             # Pinbar Reversals
             dataframe = lta.pinbar(dataframe, smi)
