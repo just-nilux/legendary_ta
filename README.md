@@ -29,6 +29,3 @@ Popular MT4 & Pinescript indicators ported to Python
 * [S/R Breakouts and Retests](#)
 * [SMI - Stochastic Momentum Index](https://de.tradingview.com/script/NULg8CIG-Stochastic-Momentum-Index/)
 
-### Requests
-
-:envelope: Telegram @nlxtrading
