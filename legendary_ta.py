@@ -158,7 +158,10 @@ def pinbar(df: DataFrame, smi=None):
     Pinbars are an easy but sure indication
     of incoming price reversal. 
     Signal confirmation with SMI.
-
+    
+    Pinescript Source by PeterO - Thx!
+    https://tradingview.com/script/aSJnbGnI-PivotPoints-with-Momentum-confirmation-by-PeterO/
+    
     :return: DataFrame with buy / sell signals columns populated
     """
     
