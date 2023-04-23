@@ -30,15 +30,19 @@ from technical import qtpylib
             # Fisher Stochastic Center of Gravity
             dataframe = lta.fisher_cg(dataframe)
             # dataframe["fisher_cg"]                    Float (Center Line)
-            # dataframe["fisher_sig"]               Float (Trigger Line)
+            # dataframe["fisher_sig"]                   Float (Trigger Line)
             
             # Leledc Exhaustion Bars
             dataframe = lta.exhaustion_bars(dataframe)
             # dataframe["leledc_major"]                  = 1 (Up) / -1 (Down) Direction
             # dataframe["leledc_minor"]                  = 1 Sellers exhausted / 0 Hold / -1 Buyers exhausted 
             
+            # Stochastic Momentum Index
+            dataframe = lta.smi_momentum(dataframe)
+            # dataframe["smi"]                          Float (SMI)
+            
             # Pinbar Reversals
-            dataframe = lta.pinbar(dataframe, smi)
+            dataframe = lta.pinbar(dataframe, dataframe["smi"])
             # dataframe["pinbar_buy"]                   Bool
             # dataframe["pinbar_sell"]                  Bool
             
@@ -52,10 +56,6 @@ from technical import qtpylib
             # dataframe['potential_support_retest']     Bool
             # dataframe['resistance_retest']            Bool
             # dataframe['potential_resistance_retest']  Bool
-            
-            # Stochastic Momentum Index
-            dataframe = lta.smi_momentum(dataframe)
-            # dataframe["smi"]                          Float (SMI)
             
 """
 
