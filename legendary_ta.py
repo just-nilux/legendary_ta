@@ -114,8 +114,8 @@ def breakouts(df: DataFrame, length=20):
     low = df['low']
     close = df['close']
 
-    pl = low.rolling(window=length*2+1, center=True).min()
-    ph = high.rolling(window=length*2+1, center=True).max()
+    pl = low.rolling(window=length*2+1).min()
+    ph = high.rolling(window=length*2+1).max()
     
     s_yLoc = low.shift(length + 1).where(low.shift(length + 1) > low.shift(length - 1), low.shift(length - 1))
     r_yLoc = high.shift(length + 1).where(high.shift(length + 1) > high.shift(length - 1), high.shift(length + 1))
