@@ -13,7 +13,7 @@ Popular MT4 & Pinescript indicators ported to Python
 - [x] No lookahead bias observed
 - [x] Original indicator logic preserved
 
-
+[Request Indicator Conversion](https://github.com/just-nilux/legendary_ta/issues/4)
 
 ### Use
 
